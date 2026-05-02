@@ -24,6 +24,18 @@ def trapezoid(x, a, b, c, d):
 def triangle(x, a, b, c):
     return trapezoid(x, a, b, b, c)
 
+def blue_membership(cov):
+    return {
+        "far":  triangle(cov,  0.10, 0.30, 0.55),
+        "near": trapezoid(cov, 0.40, 0.60, 1.00, 1.00),
+    }
+
+def red_membership(cov):
+    return {
+        "far":  triangle(cov,  0.10, 0.30, 0.55),
+        "near": trapezoid(cov, 0.40, 0.60, 1.00, 1.00),
+    }
+
 def get_frame(camera, w, h):
     raw = camera.getImage()
     if raw is None:
@@ -69,7 +81,7 @@ def main():
     cam_w = camera.getWidth()
     cam_h = camera.getHeight()
 
-    print("[INFO] Fuzzy math primitives ready, starting...")
+    print("[INFO] Blue/red membership sets ready, starting...")
 
     while robot.step(TIME_STEP) != -1:
         blue, red, duck, ball = sense(camera, cam_w, cam_h)
