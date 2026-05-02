@@ -12,6 +12,18 @@ DUCK_LOWER  = np.array([ 20, 100, 100]);  DUCK_UPPER  = np.array([ 35, 255, 255]
 BALL_W_LO   = np.array([  0,   0, 180]);  BALL_W_HI   = np.array([180,  40, 255])
 BALL_B_LO   = np.array([  0,   0,   0]);  BALL_B_HI   = np.array([180, 255,  50])
 
+def trapezoid(x, a, b, c, d):
+    if x <= a or x >= d:
+        return 0.0
+    if b <= x <= c:
+        return 1.0
+    if x < b:
+        return (x - a) / (b - a)
+    return (d - x) / (d - c)
+
+def triangle(x, a, b, c):
+    return trapezoid(x, a, b, b, c)
+
 def get_frame(camera, w, h):
     raw = camera.getImage()
     if raw is None:
@@ -57,7 +69,7 @@ def main():
     cam_w = camera.getWidth()
     cam_h = camera.getHeight()
 
-    print("[INFO] Colour sensing added, starting...")
+    print("[INFO] Fuzzy math primitives ready, starting...")
 
     while robot.step(TIME_STEP) != -1:
         blue, red, duck, ball = sense(camera, cam_w, cam_h)
