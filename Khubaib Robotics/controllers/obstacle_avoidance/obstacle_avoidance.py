@@ -36,6 +36,19 @@ def red_membership(cov):
         "near": trapezoid(cov, 0.40, 0.60, 1.00, 1.00),
     }
 
+def duck_membership(cov):
+    return {
+        "far":  triangle(cov,  0.03, 0.10, 0.22),
+        "near": trapezoid(cov, 0.15, 0.28, 1.00, 1.00),
+    }
+
+def ball_membership(cov):
+    return {
+        "far":   triangle(cov,  0.03, 0.08, 0.18),
+        "near":  triangle(cov,  0.12, 0.20, 0.30),
+        "close": trapezoid(cov, 0.22, 0.30, 1.00, 1.00),
+    }
+
 def get_frame(camera, w, h):
     raw = camera.getImage()
     if raw is None:
@@ -81,7 +94,7 @@ def main():
     cam_w = camera.getWidth()
     cam_h = camera.getHeight()
 
-    print("[INFO] Blue/red membership sets ready, starting...")
+    print("[INFO] All membership sets ready, starting...")
 
     while robot.step(TIME_STEP) != -1:
         blue, red, duck, ball = sense(camera, cam_w, cam_h)
