@@ -74,6 +74,42 @@ def sense(camera, w, h):
     ball = (wh + bk) / 2.0 if (wh > 0.05 and bk > 0.03) else 0.0
     return blue, red, duck, ball
 
+def fuzzy_inference(blue_cov, red_cov, duck_cov, ball_cov):
+    bm  = blue_membership(blue_cov)
+    rm  = red_membership(red_cov)
+    dm  = duck_membership(duck_cov)
+    bam = ball_membership(ball_cov)
+
+    rules = []
+
+    w = bm["far"]
+    if w > 0:
+        rules.append((w, -SPEED * 0.4,  SPEED * 0.4, "blue-far"))
+    w = bm["near"]
+    if w > 0:
+        rules.append((w, -SPEED,  SPEED, "blue-near"))
+
+    w = rm["far"]
+    if w > 0:
+        rules.append((w,  SPEED * 0.4, -SPEED * 0.4, "red-far"))
+    w = rm["near"]
+    if w > 0:
+        rules.append((w,  SPEED, -SPEED, "red-near"))
+
+    all_w = bm["far"] + bm["near"] + rm["far"] + rm["near"]
+    forward_w = max(0.0, 1.0 - min(1.0, all_w))
+    if forward_w > 0:
+        rules.append((forward_w, SPEED, SPEED, "forward"))
+
+    if not rules:
+        return SPEED, SPEED
+    total_w = sum(r[0] for r in rules)
+    if total_w < 1e-6:
+        return SPEED, SPEED
+    left_out  = sum(r[0] * r[1] for r in rules) / total_w
+    right_out = sum(r[0] * r[2] for r in rules) / total_w
+    return left_out, right_out
+
 def main():
     robot = Robot()
 
@@ -94,12 +130,13 @@ def main():
     cam_w = camera.getWidth()
     cam_h = camera.getHeight()
 
-    print("[INFO] All membership sets ready, starting...")
+    print("[INFO] Fuzzy inference (blue+red) active, starting...")
 
     while robot.step(TIME_STEP) != -1:
         blue, red, duck, ball = sense(camera, cam_w, cam_h)
-        left_motor.setVelocity(SPEED)
-        right_motor.setVelocity(SPEED)
+        l_spd, r_spd = fuzzy_inference(blue, red, duck, ball)
+        left_motor.setVelocity(l_spd)
+        right_motor.setVelocity(r_spd)
 
 if __name__ == "__main__":
     main()
