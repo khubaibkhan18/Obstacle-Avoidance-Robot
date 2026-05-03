@@ -96,7 +96,26 @@ def fuzzy_inference(blue_cov, red_cov, duck_cov, ball_cov):
     if w > 0:
         rules.append((w,  SPEED, -SPEED, "red-near"))
 
-    all_w = bm["far"] + bm["near"] + rm["far"] + rm["near"]
+    w = dm["far"]
+    if w > 0:
+        rules.append((w, -SPEED * 0.5,  SPEED * 0.5, "duck-far"))
+    w = dm["near"]
+    if w > 0:
+        rules.append((w, -SPEED,  SPEED, "duck-near"))
+
+    w = bam["far"]
+    if w > 0:
+        rules.append((w,  SPEED,        SPEED,        "ball-far"))
+    w = bam["near"]
+    if w > 0:
+        rules.append((w,  SPEED * 0.6,  SPEED * 0.6,  "ball-near"))
+    w = bam["close"]
+    if w > 0:
+        rules.append((w * 3,  0.0,  0.0, "ball-close"))
+
+    all_w = (bm["far"] + bm["near"] + rm["far"] + rm["near"] +
+             dm["far"] + dm["near"] +
+             bam["far"] + bam["near"] + bam["close"] * 3)
     forward_w = max(0.0, 1.0 - min(1.0, all_w))
     if forward_w > 0:
         rules.append((forward_w, SPEED, SPEED, "forward"))
@@ -130,7 +149,7 @@ def main():
     cam_w = camera.getWidth()
     cam_h = camera.getHeight()
 
-    print("[INFO] Fuzzy inference (blue+red) active, starting...")
+    print("[INFO] All fuzzy rules active, starting...")
 
     while robot.step(TIME_STEP) != -1:
         blue, red, duck, ball = sense(camera, cam_w, cam_h)
